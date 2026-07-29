@@ -10,6 +10,7 @@ function App() {
         ? "text-white border-b-2 border-white font-bold"
         : "text-zinc-500 hover:text-zinc-300 border-b-2 border-transparent font-medium"
     }`;
+
   return (
     <div className="w-full h-screen bg-zinc-900">
       <div className="flex flex-row text-white gap-7 h-12 font-bold w-full justify-center pt-4 cursor-pointer text-lg">
