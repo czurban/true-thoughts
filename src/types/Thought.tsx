@@ -1,5 +1,7 @@
 export interface Thought {
-  id: number;
+  id: string;
   text: string;
   createdAt?: string;
+  displayNumber: number;
+  onDelete: (id: string) => void | Promise<void>;
 }

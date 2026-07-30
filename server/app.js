@@ -1,25 +1,60 @@
 import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
+import mongoose from "mongoose";
+
+dotenv.config();
+
 const app = express();
 
 app.use(express.json());
-
 app.use(cors());
-const thoughts = [];
 
-app.post("/", function (req, res) {
-  const { text } = req.body;
-  const newThought = {
-    id: Date.now(),
-    text,
-    createdAt: new Date().toISOString(),
-  };
-  thoughts.push(newThought);
-  res.status(201).json(newThought);
+const thoughtSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-app.get("/", function (req, res) {
-  res.json(thoughts);
+thoughtSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
 });
 
-app.listen(3000);
+const Thought = mongoose.model("Thought", thoughtSchema);
+
+mongoose.connect(process.env.MONGO_URI).catch((err) => console.error(err));
+
+app.get("/", async (req, res) => {
+  try {
+    const thoughts = await Thought.find().sort({ createdAt: -1 });
+    res.json(thoughts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/", async (req, res) => {
+  try {
+    const { text } = req.body;
+    const newThought = await Thought.create({ text });
+    res.status(201).json(newThought);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Thought.findByIdAndDelete(id);
+    res.status(200).json({ message: "Deleted" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT);
