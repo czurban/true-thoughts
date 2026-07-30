@@ -1,4 +1,3 @@
-import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
@@ -7,15 +6,26 @@ dotenv.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
 app.use(express.json());
-app.options("*", cors());
 
 const thoughtSchema = new mongoose.Schema({
   text: { type: String, required: true },
@@ -53,16 +63,19 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.get("/", async (req, res) => {
+const getThoughts = async (req, res) => {
   try {
     const thoughts = await Thought.find().sort({ createdAt: -1 });
     res.json(thoughts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
 
-app.post("/", async (req, res) => {
+app.get("/", getThoughts);
+app.get("/thoughts", getThoughts);
+
+const createThought = async (req, res) => {
   try {
     const { text } = req.body;
     const newThought = await Thought.create({ text });
@@ -70,9 +83,12 @@ app.post("/", async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-});
+};
 
-app.delete("/:id", async (req, res) => {
+app.post("/", createThought);
+app.post("/thoughts", createThought);
+
+const deleteThought = async (req, res) => {
   try {
     const { id } = req.params;
     await Thought.findByIdAndDelete(id);
@@ -80,11 +96,14 @@ app.delete("/:id", async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-});
+};
+
+app.delete("/:id", deleteThought);
+app.delete("/thoughts/:id", deleteThought);
 
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  app.listen(PORT);
 }
 
 export default app;
