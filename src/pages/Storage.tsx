@@ -9,7 +9,9 @@ export default function Storage() {
   async function onDelete(idToRemove: string) {
     setThoughts((prev) => prev.filter((thought) => thought.id !== idToRemove));
     try {
-      await axios.delete(`http://localhost:3000/${idToRemove}`);
+      await axios.delete(
+        `https://true-thoughts-henna.vercel.app/thoughts/${idToRemove}`,
+      );
     } catch (error) {
       console.error(error);
     }
@@ -18,7 +20,9 @@ export default function Storage() {
   useEffect(() => {
     const loadThoughts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/");
+        const response = await axios.get(
+          "https://true-thoughts-henna.vercel.app/thoughts",
+        );
         setThoughts(response.data);
       } catch (error) {
         console.error(error);

@@ -7,7 +7,9 @@ export default function Home() {
   const handleSubmit = async () => {
     if (!thought.trim()) return;
     try {
-      await axios.post("http://localhost:3000/", { text: thought });
+      await axios.post("https://true-thoughts-henna.vercel.app/thoughts", {
+        text: thought,
+      });
       setThought("");
     } catch (error) {
       console.error(error);
