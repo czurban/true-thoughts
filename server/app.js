@@ -7,7 +7,6 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
 app.use(
   cors({
     origin: "*",
@@ -15,7 +14,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
-
+app.use(express.json());
 app.options("*", cors());
 
 const thoughtSchema = new mongoose.Schema({
