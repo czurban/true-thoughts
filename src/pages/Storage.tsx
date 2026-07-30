@@ -10,7 +10,7 @@ export default function Storage() {
     setThoughts((prev) => prev.filter((thought) => thought.id !== idToRemove));
     try {
       await axios.delete(
-        `https://true-thoughts-5t3m3xtwg-oleksii-s-projects8.vercel.app/thoughts/${idToRemove}`,
+        `https://true-thoughts.vercel.app/thoughts/${idToRemove}`,
       );
     } catch (error) {
       console.error(error);
@@ -21,7 +21,7 @@ export default function Storage() {
     const loadThoughts = async () => {
       try {
         const response = await axios.get(
-          "https://true-thoughts-5t3m3xtwg-oleksii-s-projects8.vercel.app/thoughts",
+          "https://true-thoughts.vercel.app/thoughts",
         );
         setThoughts(response.data);
       } catch (error) {
