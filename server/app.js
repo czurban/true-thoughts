@@ -23,9 +23,28 @@ thoughtSchema.set("toJSON", {
   },
 });
 
-const Thought = mongoose.model("Thought", thoughtSchema);
+const Thought =
+  mongoose.models.Thought || mongoose.model("Thought", thoughtSchema);
 
-mongoose.connect(process.env.MONGO_URI).catch((err) => console.error(err));
+let isConnected = false;
+
+const connectToDatabase = async () => {
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return;
+  }
+  await mongoose.connect(process.env.MONGO_URI);
+  isConnected = true;
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    console.error("Database connection error:", err);
+    res.status(500).json({ error: "Failed to connect to database" });
+  }
+});
 
 app.get("/", async (req, res) => {
   try {
@@ -58,7 +77,7 @@ app.delete("/:id", async (req, res) => {
 
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT);
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
 export default app;
